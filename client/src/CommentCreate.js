@@ -1,32 +1,71 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
+
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:4001";
 
 const CommentCreate = ({ postId }) => {
   const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const onSubmit = async (event) => {
-    event.preventDefault();
+  const handleInputChange = (e) => {
+    setContent(e.target.value);
+    if (error) setError(""); 
+  };
 
-    await axios.post(`http://localhost:4001/posts/${postId}/comments`, {
-      content,
-    });
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    setContent("");
+    try {
+      await axios.post(`${API_BASE_URL}/${postId}/comments`, {
+        content,
+      });
+      setContent("");
+    } catch (err) {
+      setError("Failed to submit comment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div>
-      <form onSubmit={onSubmit}>
-        <div className="form-group">
-          <label>New Comment</label>
-          <input
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="form-control"
-          />
-        </div>
-        <button className="btn btn-primary">Submit</button>
-      </form>
+    <div className="card my-3 shadow-sm">
+      <div className="card-body">
+        <form onSubmit={onSubmit}>
+          <div className="mb-3">
+            <label htmlFor="commentInput" className="form-label fw-bold">
+              Add a Comment
+            </label>
+            <input
+              id="commentInput"
+              type="text"
+              value={content}
+              onChange={handleInputChange}
+              className="form-control"
+              placeholder="Write your comment here..."
+              disabled={loading}
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="alert alert-danger py-2">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit Comment"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
