@@ -2,6 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: posts-depl
+  labels:
+    app: posts
+    tier: backend
+    environment: development
+  annotations:
+    description: "Deployment for the posts service"
+    owner: "selected Group"
 spec:
   replicas: 1
   selector:
